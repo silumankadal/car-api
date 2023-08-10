@@ -88,3 +88,33 @@ func GetCar(ctx *gin.Context){
 		"car" : carData,
 	})
 }
+
+func DeleteCar(ctx *gin.Context){
+	carID := ctx.Param("carID")
+	condition := false
+	var carIndex int
+
+	for i, car := range CarDatas{
+		if carID == car.CarID{
+			condition = true
+			carIndex = 1
+			break
+		}
+	}
+
+	if !condition{
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+			"error_status" : "Data Not Found",
+			"error_message" : fmt.Sprintf("car with id %v not found", carID)
+		})
+		return
+	}
+
+	copy(CarDatas[carIndex:], CarDatas[carIndex+1])
+	CarDatas[len(CarDatas)-1] = Car{}
+	CarDatas = CarDatas[:len(CarDatas)-1]
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message" : fmt.Sprintf("car with id %v has been successfully deleted", carID),
+	})
+}
