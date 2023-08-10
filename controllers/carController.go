@@ -62,3 +62,29 @@ func UpdateCar(ctx *gin.Context){
 		"message" : fmt.Sprintf("car with id %v has been successfully updated", carID),
 	})
 }
+
+func GetCar(ctx *gin.Context){
+	carID := ctx.Param("carID")
+	condition := false
+	var carData Car
+
+	for i, car := range CarDatas{
+		if carID == car.CarID{
+			condition = true
+			carData = CarDatas[i]
+			break
+		}
+	}
+
+	if !condition{
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+			"error_status" : "Data Not Found",
+			"error_message" : fmt.Sprintf("car with id %v not found", carID)
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"car" : carData,
+	})
+}
