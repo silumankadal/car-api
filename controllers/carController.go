@@ -19,7 +19,7 @@ var CarDatas = []Car{}
 func CreateCar(ctx *gin.Context){
 	var newCar	Car
 
-	if arr := ctx.ShouldBindJSON(&newCar); err != nil{
+	if err := ctx.ShouldBindJSON(&newCar); err != nil{
 		ctx.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
@@ -33,4 +33,32 @@ func CreateCar(ctx *gin.Context){
 
 func UpdateCar(ctx *gin.Context){
 	carID := ctx.Param("carID")
+	condition := false
+	var updateCar Car
+
+	if err := ctx.ShouldBindJSON(&updateCar); err != nil{
+		ctx.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	for i, car := range CarDatas{
+		if carID == car.CarID{
+			condition = true
+			CarDatas[i] = updateCar
+			CarDatas[i].carID = carID
+			break
+		}
+	}
+
+	if !condition {
+		ctx.AbortWithStatusJSON(http.StatusNotFound, gin.H{
+			"error_status" : "Page Not Found",
+			"error_message" : fmt.Sprintf("car with id %v not found", carID)
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"message" : fmt.Sprintf("car with id %v has been successfully updated", carID),
+	})
 }
